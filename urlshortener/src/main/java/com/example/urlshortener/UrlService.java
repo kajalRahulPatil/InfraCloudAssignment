@@ -1,8 +1,11 @@
 package com.example.urlshortener;
 
+import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class UrlService {
     
@@ -31,17 +34,42 @@ public class UrlService {
         }
 
         // Generate short key using Base62
-        String shortKey = encode(counter.getAndIncrement());
+        String shortCode = encode(counter.getAndIncrement());
         
-        shortToLong.put(shortKey, originalUrl);
-        longToShort.put(originalUrl, shortKey);
+        shortToLong.put(shortCode, originalUrl);
+        longToShort.put(originalUrl, shortCode);
         
         updateDomainMetrics(originalUrl);
         
-        return "http://localhost:8080/api/" + shortKey;
+        return "http://localhost:8080/api/" + shortCode;
+    }
+
+    public String getOriginalUrl(String shortKey) {
+        return shortToLong.get(shortKey);
     }
 
     private void updateDomainMetrics(String url){
+        try {
+            String domain = new URI(url).getHost();
+            if (domain != null) {
+                // Clean www. if present
+                domain = domain.startsWith("www.") ? domain.substring(4) : domain;
+                domainCounts.put(domain, domainCounts.getOrDefault(domain, 0) + 1);
+            }
+        } catch (Exception ignored) {}
 
     }
+
+    public Map<String, Integer> getTopDomains() {
+        return domainCounts.entrySet()
+            .stream()
+            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .limit(3)
+            .collect(Collectors.toMap(
+                Map.Entry::getKey, 
+                Map.Entry::getValue, 
+                (e1, e2) -> e1, 
+                LinkedHashMap::new));
+    }
+
 }
