@@ -34,14 +34,14 @@ public class UrlService {
         }
 
         // Generate short key using Base62
-        String shortCode = encode(counter.getAndIncrement());
+        String shortKey = encode(counter.getAndIncrement());
         
-        shortToLong.put(shortCode, originalUrl);
-        longToShort.put(originalUrl, shortCode);
+        shortToLong.put(shortKey, originalUrl);
+        longToShort.put(originalUrl, shortKey);
         
         updateDomainMetrics(originalUrl);
         
-        return "http://localhost:8080/api/" + shortCode;
+        return "http://localhost:8080/api/" + shortKey;
     }
 
     public String getOriginalUrl(String shortKey) {
