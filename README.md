@@ -1,4 +1,4 @@
-# InfraCloudAssignment
+# URL Shortener
 # git config --global user.name KajalRahulPatil
 # git config --global user.email kajal2693@gmail.com  
 # How to run & Test
